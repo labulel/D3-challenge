@@ -21,7 +21,7 @@ var svg = d3
   .attr("height", svgHeight);
 
 // Append an SVG group
-var chartGroup = svg.append("#scatter")
+var chartGroup = svg.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // Read in csv file and setting up variables
@@ -33,22 +33,15 @@ d3.csv('./assets/data/data.csv').then(function(statedata) {
         d.healthcare = +d.healthcare
     })
 
-
     var state = statedata.map(d => d.abbr)
-    // var prate = data.map(d => d.poverty)
-    // var hc = data.map(d => d.healthcare)
-
-    // console.log(state)
-    // console.log(prate)
-    // console.log(hc)    
 
 // setting up x and y scales
 var xLinearScale = d3.scaleLinear()
-.domain([0, d3.max(statedata, d => d.poverty)])
+.domain([0, d3.max(statedata, d => d.poverty)+3])
 .range([0, width]);
 
 var yLinearScale = d3.scaleLinear()
-.domain([0, d3.max(statedata, d => d.healthcare)])
+.domain([0, d3.max(statedata, d => d.healthcare)+2])
 .range([height, 0]);
 
 // Create initial axis functions
@@ -56,11 +49,44 @@ var bottomAxis = d3.axisBottom(xLinearScale);
 var leftAxis = d3.axisLeft(yLinearScale);
 
 // append axes to the chart
-chartGroup.append("#scatter")
+chartGroup.append("g")
 .attr("transform", `translate(0, ${height})`)
 .call(bottomAxis);
 
-chartGroup.append("#scatter")
+chartGroup.append("g")
 .call(leftAxis);
+
+//Create Circles
+
+var circlesGroup = chartGroup.selectAll("circle")
+.data(statedata)
+.enter()
+.append("circle")
+.attr("cx", d => xLinearScale(d.poverty))
+.attr("cy", d => yLinearScale(d.healthcare))
+.attr("r", "15")
+.attr("fill", "lightblue")
+.attr("opacity", ".5");
+
+circlesGroup.append("text")
+.attr("dx", function(d){return -20})
+.text(function(d){return d.abbr})
+
+
+// Create axes labels
+chartGroup.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left + 40)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .attr("class", "axisText")
+    .text("Lacks Healthecare (%)");
+
+chartGroup.append("text")
+    .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
+    .attr("class", "axisText")
+    .text("In Poverty (%)");
+}).catch(function(error) {
+console.log(error);
 
 })
