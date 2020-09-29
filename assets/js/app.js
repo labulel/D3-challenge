@@ -21,7 +21,7 @@ var svg = d3
   .attr("height", svgHeight);
 
 // Append an SVG group
-var chartGroup = svg.append("g")
+var chartGroup = svg.append("#scatter")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // Read in csv file and setting up variables
