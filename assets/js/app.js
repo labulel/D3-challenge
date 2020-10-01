@@ -68,9 +68,12 @@ var circlesGroup = chartGroup.selectAll("circle")
 .attr("fill", "lightblue")
 .attr("opacity", ".5");
 
+
+//append circles with state abbrs
 circlesGroup.append("text")
-.attr("dx", function(d){return -20})
 .text(function(d){return d.abbr})
+.attr("x",  d => xLinearScale(d.poverty))
+.attr("y",d => yLinearScale(d.healthcare))
 
 
 // Create axes labels
