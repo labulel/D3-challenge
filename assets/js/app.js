@@ -12,8 +12,7 @@ var margin = {
 var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
-// Create an SVG wrapper, append an SVG group that will hold our chart,
-// and shift the latter by left and top margins.
+// Create an SVG wrapper, append an SVG group 
 var svg = d3
   .select("#scatter")
   .append("svg")
@@ -37,7 +36,7 @@ d3.csv('./assets/data/data.csv').then(function(statedata) {
 
 // setting up x and y scales
 var xLinearScale = d3.scaleLinear()
-.domain([0, d3.max(statedata, d => d.poverty)+3])
+.domain([d3.min(statedata, d => d.poverty)-1, d3.max(statedata, d => d.poverty)+3])
 .range([0, width]);
 
 var yLinearScale = d3.scaleLinear()
@@ -65,15 +64,54 @@ var circlesGroup = chartGroup.selectAll("circle")
 .attr("cx", d => xLinearScale(d.poverty))
 .attr("cy", d => yLinearScale(d.healthcare))
 .attr("r", "15")
-.attr("fill", "lightblue")
+.attr("fill", "blue")
+.style("stroke", "black")
 .attr("opacity", ".5");
 
+var circlenames = chartGroup.selectAll(null).data(statedata).enter().append("text");
 
 //append circles with state abbrs
-circlesGroup.append("text")
-.text(function(d){return d.abbr})
-.attr("x",  d => xLinearScale(d.poverty))
-.attr("y",d => yLinearScale(d.healthcare))
+circlenames
+  .attr("x", function(d) {
+    return xLinearScale(d.poverty);
+  })
+  .attr("y", function(d) {
+    return yLinearScale(d.healthcare);
+  })
+  .text(function(d) {
+    return d.abbr;
+  })
+  .attr("font-family", "sans-serif")
+  .attr("font-size", "10px")
+  .attr("text-anchor", "middle")
+  .attr("fill", "white");
+
+
+  // Initialize tooltip
+  var toolTip = d3.tip() 
+    .attr("class", "tooltip")
+    .offset([80, -60])
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "2px")
+    .style("border-radius", "5px")
+    .style("padding", "5px")
+    .html(function(d) {
+      return  `${d.state}<br>PovertyRate: ${d.poverty}<br>Healthcare: ${d.healthcare}<br>`; 
+  });
+
+  // Create tooltip in chartGroup
+  chartGroup.call(toolTip);
+
+  // Create mouseover event to display and hide the tooltip
+  circlesGroup.on("mouseover", function(d) {
+    toolTip.show(d, this);
+  })
+    // Create mouseout event to clear output
+    .on("mouseout", function(d, i) {
+      toolTip.hide(d);
+    });
+
 
 
 // Create axes labels
